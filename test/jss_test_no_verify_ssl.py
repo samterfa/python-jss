@@ -18,7 +18,6 @@ objects.
 
 """
 
-import unittest
 import subprocess
 import inspect
 import os.path
@@ -39,9 +38,9 @@ elif is_linux():
     pref_path = os.path.join("~", "." + prefs)
 else:
     raise Exception("Unknown/unsupported OS.")
-# jp = JSSPrefs(pref_path)
-# j_global = JSS(jp, ssl_verify=False)
-# j_global.ssl_verify = False
+jp = JSSPrefs(pref_path)
+j_global = JSS(jp, ssl_verify=False)
+j_global.ssl_verify = False
 
 
 TESTPOLICY = 'python-jss Test Policy'
@@ -65,7 +64,7 @@ def setup():
         pass
 
 
-class TestJSSNoVerifySSL(unittest.TestCase):
+class TestJSSNoVerifySSL(object):
 
     def test_jss_get_no_verify(self):
         assert_is_instance(j_global.Policy(), JSSObjectList)
