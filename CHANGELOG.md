@@ -125,7 +125,7 @@ All notable changes to this project will be documented in this file. This projec
   has been rewritten to provide a very basic marker of the type, and `str` has
   been written to provide the pretty-printing of XML functionality that it had
   previously. In practice, this means that in the interpreter, developers will
-  have to `print x` instead of just entering `x` to see what they have.
+  have to `print(x)` instead of just entering `x` to see what they have.
   However, it also means that simply doing `x` gives easier to read information
   for QuerySets of items without dumping their entire contents to screen (e.g.
   `j.Computer()` results in thousands of lines vomited into your terminal).
