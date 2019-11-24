@@ -22,6 +22,16 @@ removed. Do not rely on its continued existence!
 """
 from __future__ import unicode_literals
 
+# from urllib.error import HTTPError
+# 2 and 3 compatible
+# try:
+from urllib.parse import urlencode  # urlparse
+
+# from urllib.request import Request, urlopen
+from xml.etree import ElementTree
+
+# from .pretty_element import PrettyElement
+
 try:
     # Python 2
     from __builtin__ import str as text
@@ -29,19 +39,11 @@ except ImportError:
     # Python 3
     from builtins import str as text
 
-# 2 and 3 compatible
-try:
-    from urllib.parse import urlparse, urlencode
-    from urllib.request import urlopen, Request
-    from urllib.error import HTTPError
-except ImportError:
-    from urlparse import urlparse
-    from urllib import urlencode
-    from urllib2 import urlopen, Request, HTTPError
 
-from xml.etree import ElementTree
-
-from .pretty_element import PrettyElement
+# except ImportError:
+# from urlparse import urlparse
+# from urllib import urlencode
+# from urllib2 import urlopen, Request, HTTPError
 
 
 class Casper(ElementTree.Element):
@@ -68,18 +70,15 @@ class Casper(ElementTree.Element):
         # adapter handle the outgoing data encoding.
         user = text(self.jss.user)
         password = text(self.jss.password)
-        self.auth = urlencode(
-            {"username": user, "password": password})
+        self.auth = urlencode({"username": user, "password": password})
         super(Casper, self).__init__("Casper")
         self.update()
 
     def update(self):
         """Request an updated set of data from casper.jxml."""
-        response = self.jss.session.post(
-            self.url, data=self.auth)
+        response = self.jss.session.post(self.url, data=self.auth)
         response_xml = ElementTree.fromstring(response.content)
 
         # Remove previous data, if any, and then add in response's XML.
         self.clear()
         self.extend(response_xml)
-

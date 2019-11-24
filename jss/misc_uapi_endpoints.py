@@ -19,7 +19,7 @@ Classes representing UAPI endpoints that are more RPC style than CRUD.
 """
 
 
-__all__ = 'SystemInitialize',
+__all__ = ("SystemInitialize",)
 
 
 class SystemInitialize(object):
@@ -43,6 +43,7 @@ class SystemInitialize(object):
 
     def initialize(self, data):
         r = self.jss.post(self.url, data)
+        return r
 
 
 class RecalculateComputerSmartGroups(object):

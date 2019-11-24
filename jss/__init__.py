@@ -53,21 +53,32 @@ Private package contents include:
 """
 
 
-from .casper import Casper
-from .curl_adapter import CurlAdapter
-from .distribution_point import (AFPDistributionPoint, SMBDistributionPoint,
-                                 JDS, CDP, LocalRepository, JCDS, AWS)
-from .distribution_points import DistributionPoints
-from .exceptions import *
-from .jamf_software_server import JSS
-from .jssobject import JSSObject
-from .jssobjects import *
-import uapiobjects as uapi
-from .jss_prefs import JSSPrefs
-from .misc_endpoints import *
-from .misc_uapi_endpoints import *
-from .queryset import QuerySet
-from .pretty_element import PrettyElement
+# import uapiobjects as uapi
+
+# from .casper import Casper
+# from .curl_adapter import CurlAdapter
+# from .distribution_point import (
+#     AWS,
+#     CDP,
+#     JCDS,
+#     JDS,
+#     AFPDistributionPoint,
+#     LocalRepository,
+#     SMBDistributionPoint,
+# )
+# from .distribution_points import DistributionPoints
+# from .exceptions import *
+# from .jamf_software_server import JSS
+# from .jss_prefs import JSSPrefs
+# from .jssobject import JSSObject
+# Deprecated
+# from .jssobjectlist import JSSObjectList
+# from .jssobjects import *
+# from .misc_endpoints import *
+# from .misc_uapi_endpoints import *
+# from .pretty_element import PrettyElement
+# from .queryset import QuerySet
+# from .tools import element_str, is_linux, is_osx
 
 # If a system doesn't have the required dependencies for requests, do
 # nothing.
@@ -75,11 +86,6 @@ try:
     from .requests_adapter import RequestsAdapter
 except ImportError:
     RequestsAdapter = None
-
-from .tools import is_osx, is_linux, element_str
-
-# Deprecated
-from .jssobjectlist import JSSObjectList
 
 
 __version__ = "2.0.1"

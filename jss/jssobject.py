@@ -18,25 +18,24 @@
 Base Classes representing JSS database objects and their API endpoints
 """
 from __future__ import print_function
-from six import string_types
 
-import collections
+# import collections
 import copy
-
-try:
-    import cPickle  # Python 2.X
-except ImportError:
-    import _pickle as cPickle  # Python 3+
-
 import datetime as dt
 import gzip
 import os
 from xml.etree import ElementTree
 
-from .exceptions import JSSError, MethodNotAllowedError, PutError, PostError
-from .pretty_element import PrettyElement
 from jss import tools
+from six import string_types
 
+from .exceptions import JSSError, MethodNotAllowedError, PostError, PutError
+from .pretty_element import PrettyElement
+
+try:
+    import cPickle  # Python 2.X
+except ImportError:
+    import _pickle as cPickle  # Python 3+
 
 
 DATE_FMT = "%Y/%m/%d-%H:%M:%S.%f"
@@ -45,6 +44,7 @@ _MATCH = "match"
 
 class Identity(dict):
     """Subclass of dict used simply for type-checking."""
+
     pass
 
 
@@ -55,7 +55,8 @@ class JSSObject(PrettyElement):
     however, be updated.
 
     Attributes:
-        cached (:obj:`datetime.datetime`, optional): False, or datetime.datetime since last retrieval.
+        cached (:obj:`datetime.datetime`, optional): False,
+            or datetime.datetime since last retrieval.
         can_get (bool): whether object allows a GET request.
         can_put (bool): whether object allows a PUT request.
         can_post (bool): whether object allows a POST request.
@@ -68,6 +69,7 @@ class JSSObject(PrettyElement):
         **kwargs: Unused, but present to support a unified signature
             for all subclasses (which need and use kwargs).
     """
+
     _endpoint_path = None
     can_get = True
     can_put = True
@@ -112,7 +114,7 @@ class JSSObject(PrettyElement):
         Returns:
             str path construction for this class to query.
         """
-        return 'JSSResource/%s' % cls._endpoint_path
+        return "JSSResource/%s" % cls._endpoint_path
 
     @property
     def url(self):
@@ -121,7 +123,7 @@ class JSSObject(PrettyElement):
         For example: "/activationcode"
         """
         # Flat objects have no ID property, so there is only one URL.
-        return 'JSSResource/%s' % self._endpoint_path
+        return "JSSResource/%s" % self._endpoint_path
 
     def __repr__(self):
         if isinstance(self.cached, dt.datetime):
@@ -129,7 +131,8 @@ class JSSObject(PrettyElement):
         else:
             cached = bool(self.cached)
         return "<{} cached: {} at 0x{:0x}>".format(
-            self.__class__.__name__, cached, id(self))
+            self.__class__.__name__, cached, id(self)
+        )
 
     def __eq__(self, other):
         # There is no way to really compare as equal without grabbing
@@ -229,11 +232,11 @@ class JSSObject(PrettyElement):
             printing.
         """
         results = self._get_tags(self, depth)
-        return '\n'.join(results)
+        return "\n".join(results)
 
     def _get_tags(self, element, depth, level=0):
         results = []
-        space = ' '
+        space = " "
         indent_size = 4
         if depth is None or level < depth:
             for child in element:
@@ -249,10 +252,27 @@ class JSSObject(PrettyElement):
 # Decorate all public API methods that should trigger a retrieval of the
 # object's full data from the JSS.
 cache_triggers = (
-    '__getitem__', '__len__', '__setitem__', '__str__', 'copy',
-    'extend', 'find', 'findall', 'findtext', 'get', 'getchildren',
-    'getiterator', 'insert', 'items', 'iter', 'iterfind', 'itertext', 'keys',
-    'remove', 'set')
+    "__getitem__",
+    "__len__",
+    "__setitem__",
+    "__str__",
+    "copy",
+    "extend",
+    "find",
+    "findall",
+    "findtext",
+    "get",
+    "getchildren",
+    "getiterator",
+    "insert",
+    "items",
+    "iter",
+    "iterfind",
+    "itertext",
+    "keys",
+    "remove",
+    "set",
+)
 
 # Ones that block us:
 # - Are not methods: 'tail', 'text', 'attrib','tag'
@@ -267,7 +287,8 @@ class Container(JSSObject):
     Computers and Policies.
 
     Attributes:
-        cached (:obj:`datetime.datetime`, optional): False, or datetime.datetime since last retrieval.
+        cached (:obj:`datetime.datetime`, optional): False, or
+            datetime.datetime since last retrieval.
         can_get (bool): whether object allows a GET request.
         can_put (bool): whether object allows a PUT request.
         can_post (bool): whether object allows a POST request.
@@ -316,6 +337,7 @@ class Container(JSSObject):
         **kwargs: Key/value pairs to be added to the object when
             building one from scratch.
     """
+
     root_tag = "Container"
     can_get = True
     can_put = True
@@ -361,12 +383,13 @@ class Container(JSSObject):
         else:
             raise TypeError(
                 "JSSObjects data argument must be of type "
-                "xml.etree.ElemenTree.Element, Identity, or str")
+                "xml.etree.ElemenTree.Element, Identity, or str"
+            )
 
     def __repr__(self):
         return "<{} with id: {} name: {} cached: {} at 0x{:0x}>".format(
-            self.__class__.__name__, self.id, self.name, self.cached,
-            id(self))
+            self.__class__.__name__, self.id, self.name, self.cached, id(self)
+        )
 
     def __contains__(self, obj):
         if hasattr(obj, "as_list_data"):
@@ -430,7 +453,7 @@ class Container(JSSObject):
         Returns:
             str path construction for this class to query.
         """
-        url_components = ['JSSResource', cls._endpoint_path]
+        url_components = ["JSSResource", cls._endpoint_path]
 
         try:
             data = int(data)
@@ -441,21 +464,19 @@ class Container(JSSObject):
 
         elif isinstance(data, string_types):
             if "=" in data:
-                key, value = data.split("=")   # pylint: disable=no-member
+                key, value = data.split("=")  # pylint: disable=no-member
                 if key in cls.search_types:
                     url_components.extend([cls.search_types[key], value])
 
                 else:
-                    raise TypeError(
-                        "This object cannot be queried by %s." % key)
+                    raise TypeError("This object cannot be queried by %s." % key)
 
             elif "*" in data and _MATCH in cls.search_types:
                 # If wildcard char present, make this a match search if
                 # possible
                 url_components.extend([cls.search_types[_MATCH], data])
             elif data:
-                url_components.extend(
-                    [cls.search_types[cls.default_search], data])
+                url_components.extend([cls.search_types[cls.default_search], data])
 
         url_components.extend(cls._process_kwargs(kwargs))
 
@@ -480,7 +501,7 @@ class Container(JSSObject):
     @classmethod
     def _urlify_arg(cls, key, val):
         """Convert keyword arguments' values to proper format for GET"""
-        if key == 'subset':
+        if key == "subset":
             if not isinstance(val, list):
                 val = val.split("&")
 
@@ -489,14 +510,15 @@ class Container(JSSObject):
             if all(k not in val for k in ("general", "basic")):
                 val.append("general")
 
-            return ['subset', "&".join(val)]
+            return ["subset", "&".join(val)]
 
-        elif key == 'date_range':
+        elif key == "date_range":
             start, end = val
-            fmt = lambda s: s.strftime('%Y-%m-%d')
-            start = start if isinstance(start, string_types) else fmt(end)
-            end = end if isinstance(end, string_types) else fmt(end)
-            return ['{}_{}'.format(start, end)]
+            start = (
+                start if isinstance(start, string_types) else start.strftime("%Y-%m-%d")
+            )
+            end = end if isinstance(end, string_types) else end.strftime("%Y-%m-%d")
+            return ["{}_{}".format(start, end)]
 
         else:
             return [key, val]
@@ -507,7 +529,7 @@ class Container(JSSObject):
 
         For example: "computers/id/451"
         """
-        url_components = ['JSSResource', self._endpoint_path, self._id_path, self.id]
+        url_components = ["JSSResource", self._endpoint_path, self._id_path, self.id]
         url_components.extend(self._process_kwargs(self.kwargs))
         return os.path.join(*url_components)
 
@@ -656,10 +678,11 @@ class Container(JSSObject):
         else:
             raise JSSError("Name property couldn't be found!")
         # self._basic_name = self.find('name').text = name
-        self._basic_identity["name"] = self.find('name').text = name
+        self._basic_identity["name"] = self.find("name").text = name
+        return path
 
     @property
-    def id(self):   # pylint: disable=invalid-name
+    def id(self):  # pylint: disable=invalid-name
         """Return object ID or None."""
         # Most objects have ID nested in general. Groups don't.
 
@@ -762,8 +785,9 @@ class Container(JSSObject):
         """
         location = self._handle_location(location)
         location.append(obj.as_list_data())
-        results = [item for item in location.getchildren() if
-                   item.findtext("id") == obj.id][0]
+        results = [
+            item for item in location.getchildren() if item.findtext("id") == obj.id
+        ][0]
         return results
 
     def remove_object_from_list(self, obj, list_element):
@@ -777,18 +801,22 @@ class Container(JSSObject):
         list_element = self._handle_location(list_element)
 
         if isinstance(obj, Container):
-            results = [item for item in list_element.getchildren() if
-                       item.findtext("id") == obj.id]
+            results = [
+                item
+                for item in list_element.getchildren()
+                if item.findtext("id") == obj.id
+            ]
         elif isinstance(obj, (int, string_types)):
-            results = [item for item in list_element.getchildren() if
-                       item.findtext("id") == str(obj) or
-                       item.findtext("name") == obj]
+            results = [
+                item
+                for item in list_element.getchildren()
+                if item.findtext("id") == str(obj) or item.findtext("name") == obj
+            ]
 
         if len(results) == 1:
             list_element.remove(results[0])
         elif len(results) > 1:
-            raise ValueError("There is more than one matching object at that "
-                             "path!")
+            raise ValueError("There is more than one matching object at that " "path!")
 
     def clear_list(self, list_element):
         """Clear an Element or everything below a path.
@@ -826,7 +854,7 @@ class Container(JSSObject):
         """
         # ElementTree.fromstring in python2 really wants bytes.
         if isinstance(xml_string, unicode):
-            xml_string = xml_string.encode('UTF-8')
+            xml_string = xml_string.encode("UTF-8")
         root = ElementTree.fromstring(xml_string)
         return cls(jss, root)
 
@@ -875,15 +903,16 @@ class Container(JSSObject):
             path = path + gz_ext
 
         opener = gzip.open if compress else open
-        with opener(path, 'wb') as file_handle:
-            cPickle.Pickler(
-                file_handle, cPickle.HIGHEST_PROTOCOL).dump(self)
+        with opener(path, "wb") as file_handle:
+            cPickle.Pickler(file_handle, cPickle.HIGHEST_PROTOCOL).dump(self)
 
 
 class Group(Container):
     """Abstract class for ComputerGroup and MobileDeviceGroup."""
 
-    def add_criterion(self, name, priority, and_or, search_type, value):   # pylint: disable=too-many-arguments
+    def add_criterion(
+        self, name, priority, and_or, search_type, value
+    ):  # pylint: disable=too-many-arguments
         """Add a search criteria object to a smart group.
 
         Args:
@@ -951,8 +980,16 @@ class Group(Container):
         else:
             raise ValueError
 
-        return len([device for device in self.findall(container_search) if
-                    device.findtext("id") == device_object.id]) is not 0
+        return (
+            len(
+                [
+                    device
+                    for device in self.findall(container_search)
+                    if device.findtext("id") == device_object.id
+                ]
+            )
+            != 0
+        )
 
 
 # class Scoped(Container):
@@ -1047,11 +1084,15 @@ class Group(Container):
 #             raise TypeError
 #
 
+
 class SearchCriteria(PrettyElement):
     """Object for encapsulating a smart group search criteria."""
+
     root_tag = "criterion"
 
-    def __init__(self, name, priority, and_or, search_type, value):   # pylint: disable=too-many-arguments
+    def __init__(
+        self, name, priority, and_or, search_type, value
+    ):  # pylint: disable=too-many-arguments
         """Init a SearchCriteria.
 
         Args:

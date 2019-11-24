@@ -17,14 +17,39 @@
 
 Classes representing JSS database objects and their UAPI endpoints
 """
-from .uapiobject import UAPIObject, UAPIContainer
+from .uapiobject import UAPIContainer, UAPIObject
 
-__all__ = 'AdvancedMobileDeviceSearch', 'AlertNotification', 'Building', 'Cache', 'Category', 'ClientCheckIn', \
-          'Department', 'DeviceEnrollment', 'Ebook', 'Engage', 'EnrollmentHistory', 'EnrollmentSetting', \
-          'EnrollmentSettingSetting', 'Lobby', \
-          'MobileDevice', 'PatchPolicy', 'ReEnrollmentSetting', 'Script', 'SelfServiceBrandingConfiguration', \
-          'SelfServiceSettings', 'SSOCertificate', 'SSOSetting', 'Site', 'StartupStatus', 'SystemInformation', \
-          'SystemInitialize', 'User', 'VPPAdminAccount', 'VPPSubscription'
+__all__ = (
+    "AdvancedMobileDeviceSearch",
+    "AlertNotification",
+    "Building",
+    "Cache",
+    "Category",
+    "ClientCheckIn",
+    "Department",
+    "DeviceEnrollment",
+    "Ebook",
+    "Engage",
+    "EnrollmentHistory",
+    "EnrollmentSetting",
+    "EnrollmentSettingSetting",
+    "Lobby",
+    "MobileDevice",
+    "PatchPolicy",
+    "ReEnrollmentSetting",
+    "Script",
+    "SelfServiceBrandingConfiguration",
+    "SelfServiceSettings",
+    "SSOCertificate",
+    "SSOSetting",
+    "Site",
+    "StartupStatus",
+    "SystemInformation",
+    "SystemInitialize",
+    "User",
+    "VPPAdminAccount",
+    "VPPSubscription",
+)
 
 
 class AdvancedMobileDeviceSearch(UAPIContainer):
@@ -94,14 +119,18 @@ class EnrollmentHistory(UAPIContainer):
 
 
 class EnrollmentSetting(UAPIObject):
-    _endpoint_path = "settings/enrollment"  # was: settings/obj/enrollment until about 10.9
+    _endpoint_path = (
+        "settings/enrollment"  # was: settings/obj/enrollment until about 10.9
+    )
     can_post = False
     can_delete = False
 
 
-# Unbelievably, this has a different schema but is intended for the same usage as EnrollmentSetting
+# Unbelievably, this has a different schema but is intended for the same
+# usage as EnrollmentSetting
 class EnrollmentSettingSetting(UAPIObject):
-    _endpoint_path = "settings/enrollment/settings"  # was: settings/obj/enrollment/settings until about 10.9
+    # was: settings/obj/enrollment/settings until about 10.9
+    _endpoint_path = "settings/enrollment/settings"
     can_post = False
     can_delete = False
 
@@ -169,6 +198,7 @@ class PatchPolicy(UAPIContainer):
 #     can_put = False
 #     can_post = False
 #     can_delete = False
+
 
 class Patch(UAPIContainer):
     _endpoint_path = "patch/obj/policy"

@@ -20,35 +20,37 @@ as JSSObjects.
 """
 from __future__ import print_function
 
+import gzip
+import json
+import os
+
+# import platform
+import re
+from typing import Optional, Union
+from xml.etree import ElementTree
+
+import requests
+
+from . import jssobjects, uapiobjects
+from .auth import UAPIAuth
+
+# from jss.nsurlsession_adapter import NSURLSessionAdapter
+# from .curl_adapter import CurlAdapter
+from .distribution_points import DistributionPoints
+from .exceptions import DeleteError, GetError, PostError, PutError
+from .jssobject import JSSObject
+from .queryset import QuerySet
+from .tools import error_handler, quote_and_encode
+
 try:
     import cPickle  # Python 2.X
 except ImportError:
     import _pickle as cPickle  # Python 3+
 
-
-import gzip
-import os
-import platform
-import re
-import json
-from xml.etree import ElementTree
-import requests
-
 try:
     from UserDict import UserDict  # Python 2.X
 except ImportError:
     from collections import UserDict  # Python 3.3+
-
-# from jss.nsurlsession_adapter import NSURLSessionAdapter
-from .curl_adapter import CurlAdapter
-from .auth import UAPIAuth
-from .distribution_points import DistributionPoints
-from .exceptions import GetError, PutError, PostError, DeleteError
-from .jssobject import JSSObject
-from . import jssobjects
-from . import uapiobjects
-from .queryset import QuerySet
-from .tools import error_handler, quote_and_encode
 
 
 # Pylint wants us to store our many attributes in a dictionary.
@@ -71,7 +73,8 @@ class JSS(object):
         repo_prefs (list): List of dicts of repository configuration data.
         verbose (bool): Whether to include extra output.
         session: "Session" used to make all HTTP requests through
-            whichever network adapter is in use (default is the requests adapter).
+            whichever network adapter is in use (default is the requests
+            adapter).
         ssl_verify (bool): Whether to verify SSL traffic from the JSS
             is genuine.
         distribution_points (:obj:`DistributionPoints`): DistributionPoints
@@ -128,7 +131,9 @@ class JSS(object):
     """
 
     class UAPI(object):
-        """This object represents the UAPI. All UAPI search methods will be attached here."""
+        """This object represents the UAPI. All UAPI search methods will be
+        attached here."""
+
         def __init__(self, jss, url=None):
             self.jss = jss
             self._base_url = url
@@ -150,7 +155,9 @@ class JSS(object):
             return "%s/%s" % (self.base_url, "uapi")
 
     class JSSAPI(object):
-        """This object represents the XML API. All regular API search methods will be attached here."""
+        """This object represents the XML API. All regular API search methods
+        will be attached here."""
+
         def __init__(self, jss, url=None):
             self.jss = jss
             self._base_url = url
@@ -172,8 +179,16 @@ class JSS(object):
 
     # pylint: disable=too-many-arguments
     def __init__(
-        self, jss_prefs=None, url=None, user=None, password=None,
-        repo_prefs=None, ssl_verify=True, verbose=False, **kwargs):
+        self,
+        jss_prefs=None,
+        url=None,
+        user=None,
+        password=None,
+        repo_prefs=None,
+        ssl_verify=True,
+        verbose=False,
+        **kwargs
+    ):
 
         if jss_prefs is not None:
             url = jss_prefs.url
@@ -181,15 +196,15 @@ class JSS(object):
             password = jss_prefs.password
             repo_prefs = jss_prefs.repos
             ssl_verify = jss_prefs.verify
-            suppress_warnings = jss_prefs.suppress_warnings
+            # suppress_warnings = jss_prefs.suppress_warnings
 
         # TODO: This method currently accepts '**kwargs' to soften
         # the deprecation of the urllib warnings removal.
 
         self.base_url = url
 
-        if 'adapter' in kwargs:
-            self.session = kwargs['adapter']
+        if "adapter" in kwargs:
+            self.session = kwargs["adapter"]
         else:
             self.session = requests.session()
 
@@ -236,7 +251,7 @@ class JSS(object):
             value (str): username.
         """
         auth = self.session.auth
-        password = auth[1] if auth else ''
+        password = auth[1] if auth else ""
         self.session.auth = (value, password)
 
     @property
@@ -252,7 +267,7 @@ class JSS(object):
             value (str): password.
         """
         auth = self.session.auth
-        user = auth[0] if auth else ''
+        user = auth[0] if auth else ""
         self.session.auth = (user, value)
 
     @property
@@ -299,8 +314,8 @@ class JSS(object):
             headers: [Optional] headers to add to the request
 
         Returns:
-            ElementTree.Element for the XML returned from the JSS if the response was XML,
-            dict if the response had Content-Type for json,
+            ElementTree.Element for the XML returned from the JSS if the
+            response was XML, dict if the response had Content-Type for json,
             bytes for anything else
 
         Raises:
@@ -312,8 +327,10 @@ class JSS(object):
             to returning None.
         """
         request_url = os.path.join(self.base_url, quote_and_encode(url_path))
-        if headers is None:  # Fall back to XML to support python-jss prior to addition of UAPI
-            headers = {'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+        if (
+            headers is None
+        ):  # Fall back to XML to support python-jss prior to addition of UAPI
+            headers = {"Content-Type": "text/xml", "Accept": "text/xml"}
 
         response = self.session.get(request_url, headers=headers, **kwargs)
 
@@ -322,14 +339,14 @@ class JSS(object):
         elif response.status_code >= 400:
             error_handler(GetError, response)
 
-        if 'text/xml' in response.headers['content-type']:
+        if "text/xml" in response.headers["content-type"]:
             # ElementTree in python2 only accepts bytes.
             try:
                 xmldata = ElementTree.fromstring(response.content)
                 return xmldata
             except ElementTree.ParseError:
                 raise GetError("Error Parsing XML:\n%s" % response.content)
-        elif response.headers['content-type'].startswith('application/json'):
+        elif response.headers["content-type"].startswith("application/json"):
             return response.json()
         else:
             return response.content
@@ -358,16 +375,16 @@ class JSS(object):
         headers = {}
 
         if isinstance(data, ElementTree.Element):
-            data = ElementTree.tostring(data, encoding='UTF-8')
-            headers = {'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+            data = ElementTree.tostring(data, encoding="UTF-8")
+            headers = {"Content-Type": "text/xml", "Accept": "text/xml"}
         elif isinstance(data, dict):
             data = json.dumps(data)
-            headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+            headers = {"Content-Type": "application/json", "Accept": "application/json"}
         elif isinstance(data, UserDict):
             data = json.dumps(data.data)
-            headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+            headers = {"Content-Type": "application/json", "Accept": "application/json"}
         else:
-            headers = {'Content-Type': 'application/octet-stream', 'Accept': '*/*'}
+            headers = {"Content-Type": "application/octet-stream", "Accept": "*/*"}
 
         response = self.session.post(request_url, data=data, headers=headers)
 
@@ -376,7 +393,7 @@ class JSS(object):
         elif response.status_code >= 400:
             error_handler(PostError, response)
 
-        if 'text/xml' in response.headers['content-type']:
+        if "text/xml" in response.headers["content-type"]:
             id_ = re.search(r"<id>([0-9]+)</id>", response.content).group(1)
         else:
             return response
@@ -404,16 +421,16 @@ class JSS(object):
         headers = {}
 
         if isinstance(data, ElementTree.Element):
-            data = ElementTree.tostring(data, encoding='UTF-8')
-            headers = {'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+            data = ElementTree.tostring(data, encoding="UTF-8")
+            headers = {"Content-Type": "text/xml", "Accept": "text/xml"}
         elif isinstance(data, dict):
             data = json.dumps(data)
-            headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+            headers = {"Content-Type": "application/json", "Accept": "application/json"}
         elif isinstance(data, UserDict):
             data = json.dumps(data.data)
-            headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+            headers = {"Content-Type": "application/json", "Accept": "application/json"}
         else:
-            raise TypeError('Could not PUT unrecognised data type')
+            raise TypeError("Could not PUT unrecognised data type")
 
         response = self.session.put(request_url, data=data, headers=headers)
 
@@ -440,9 +457,12 @@ class JSS(object):
         """
         request_url = os.path.join(self.base_url, quote_and_encode(url_path))
         if data:
-            data = ElementTree.tostring(data, encoding='UTF-8')
-            response = self.session.delete(request_url, data=data,
-                                           headers={'Content-Type': 'text/xml', 'Accept': 'text/xml'})
+            data = ElementTree.tostring(data, encoding="UTF-8")
+            response = self.session.delete(
+                request_url,
+                data=data,
+                headers={"Content-Type": "text/xml", "Accept": "text/xml"},
+            )
         else:
             response = self.session.delete(request_url)
 
@@ -452,8 +472,7 @@ class JSS(object):
             error_handler(DeleteError, response)
 
     def retrieve_all(self):
-        all_search_methods = [
-            getattr(self, name) for name in jssobjects.__all__]
+        all_search_methods = [getattr(self, name) for name in jssobjects.__all__]
 
         all_objects = {}
         for method in all_search_methods:
@@ -466,7 +485,6 @@ class JSS(object):
                     msg += "; permission error"
                 print(msg.format(name))
                 continue
-
 
             # Flat objects can go straight in.
             if isinstance(result, JSSObject):
@@ -508,9 +526,8 @@ class JSS(object):
             path = path + gz_ext
 
         opener = gzip.open if compress else open
-        with opener(path, 'wb') as file_handle:
-            cPickle.Pickler(
-                file_handle, cPickle.HIGHEST_PROTOCOL).dump(all_objects)
+        with opener(path, "wb") as file_handle:
+            cPickle.Pickler(file_handle, cPickle.HIGHEST_PROTOCOL).dump(all_objects)
 
     @classmethod
     def from_pickle(cls, path):
@@ -602,23 +619,28 @@ class JSS(object):
     def scrape(self, url_path, session_id=None):
         """This method allows for access to things that don't have an API.
 
-        It's entirely up to you how to implement handling the requests/responses because there's no way Jamf will
-        support this.
+        It's entirely up to you how to implement handling the
+            requests/responses because there's no way Jamf will
+            support this.
 
         Args:
             url_path: String the path to scrape
-            session_id: String the session id to use. You can extract a session cookie from a previous response,
+            session_id: String the session id to use. You can extract a
+                session cookie from a previous response,
                 probably using JSESSIONID
         """
         if session_id is None:
-            response = self.session.post(self.base_url, data={'username': self.user, 'password': self.password})
+            response = self.session.post(
+                self.base_url, data={"username": self.user, "password": self.password}
+            )
 
             if response.status_code == 200:
-                scrape_url = '{}/{}'.format(self.base_url, url_path)
+                scrape_url = "{}/{}".format(self.base_url, url_path)
                 return self.session.get(scrape_url)
 
     def version(self):
         return self.JSSUser().version.text
+
 
 # There's a lot of repetition involved in creating the object query
 # methods on JSS, so we create them dynamically at import time.
@@ -632,9 +654,11 @@ def add_search_method(cls, name):
         """Flexibly search the JSS for objects of type {0}.
 
             Args:
-                data (int, str, :obj:`xml.etree.ElementTree.Element`, optional): Argument to query for.
+                data (int, str, :obj:`xml.etree.ElementTree.Element`,
+                      optional): Argument to query for.
 
-                    Different queries are performed depending on the type of this arg:
+                    Different queries are performed depending on the type of
+                        this arg:
                         - **None** (or provide no argument / default):
                             Search for all objects.
                         - **int**: Search for an object by ID.
@@ -694,9 +718,9 @@ def add_search_method(cls, name):
             return obj_type(self, data)
 
     # Add in the missing variables to the docstring and set name.
-    if hasattr(obj_type, 'allowed_kwargs') and obj_type.allowed_kwargs:
-        allowed = ', '.join(obj_type.allowed_kwargs)
-        msg = 'Allowed keyword arguments for this class are:\n{}{}'
+    if hasattr(obj_type, "allowed_kwargs") and obj_type.allowed_kwargs:
+        allowed = ", ".join(obj_type.allowed_kwargs)
+        msg = "Allowed keyword arguments for this class are:\n{}{}"
         kwarg_doc = msg.format(6 * "    ", allowed) if allowed else ""
     else:
         kwarg_doc = "(None supported)"
@@ -766,8 +790,18 @@ def add_uapi_search_method(cls, name):
         """
         if not isinstance(data, dict):
             url = obj_type.build_query(data, **kwargs)
-            data = self.jss.get(url, headers={'Content-Type': 'application/json', 'Accept': 'application/json'},
-                            auth=UAPIAuth(self.jss.user, self.jss.password, "{}/uapi/auth/tokens".format(self.jss.base_url)))
+            data = self.jss.get(
+                url,
+                headers={
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                },
+                auth=UAPIAuth(
+                    self.jss.user,
+                    self.jss.password,
+                    "{}/uapi/auth/tokens".format(self.jss.base_url),
+                ),
+            )
 
         if isinstance(data, list):
             return [obj_type(self.jss, d) for d in data]
@@ -775,9 +809,9 @@ def add_uapi_search_method(cls, name):
             return obj_type(self.jss, data)
 
     # Add in the missing variables to the docstring and set name.
-    if hasattr(obj_type, 'allowed_kwargs') and obj_type.allowed_kwargs:
-        allowed = ', '.join(obj_type.allowed_kwargs)
-        msg = 'Allowed keyword arguments for this class are:\n{}{}'
+    if hasattr(obj_type, "allowed_kwargs") and obj_type.allowed_kwargs:
+        allowed = ", ".join(obj_type.allowed_kwargs)
+        msg = "Allowed keyword arguments for this class are:\n{}{}"
         kwarg_doc = msg.format(6 * "    ", allowed) if allowed else ""
     else:
         kwarg_doc = "(None supported)"
@@ -799,4 +833,5 @@ for jss_uapi_class in uapiobjects.__all__:
 
 class JSSObjectFactory(object):
     """Deprecated"""
+
     pass

@@ -26,12 +26,12 @@ from xml.etree import ElementTree
 from .exceptions import MethodNotAllowedError, PostError
 from .tools import error_handler
 
-
-__all__ = ('CommandFlush', 'FileUpload', 'LogFlush')
+__all__ = ("CommandFlush", "FileUpload", "LogFlush")
 
 
 # pylint: disable=missing-docstring
 # pylint: disable=too-few-public-methods
+
 
 class CommandFlush(object):
     _endpoint_path = "commandflush"
@@ -79,7 +79,7 @@ class CommandFlush(object):
             DeleteError if provided url_path has a >= 400 response.
         """
         if not isinstance(data, basestring):
-            data = ElementTree.tostring(data, encoding='UTF-8')
+            data = ElementTree.tostring(data, encoding="UTF-8")
         self.jss.delete(self.url, data)
 
     def command_flush_for(self, id_type, command_id, status):
@@ -96,9 +96,13 @@ class CommandFlush(object):
         Raises:
             DeleteError if provided url_path has a >= 400 response.
         """
-        id_types = ('computers', 'computergroups', 'mobiledevices',
-                    'mobiledevicegroups')
-        status_types = ('Pending', 'Failed', 'Pending+Failed')
+        id_types = (
+            "computers",
+            "computergroups",
+            "mobiledevices",
+            "mobiledevicegroups",
+        )
+        status_types = ("Pending", "Failed", "Pending+Failed")
         if id_type not in id_types or status not in status_types:
             raise ValueError("Invalid arguments.")
 
@@ -106,9 +110,11 @@ class CommandFlush(object):
             command_id = ",".join(str(item) for item in command_id)
 
         flush_url = "{}/{}/id/{}/status/{}".format(
-            self.url, id_type, command_id, status)
+            self.url, id_type, command_id, status
+        )
 
         self.jss.delete(flush_url)
+
 
 # pylint: disable=too-few-public-methods
 
@@ -127,8 +133,9 @@ class FileUpload(object):
     However, you can reuse the FileUpload object if you wish, by
     changing the parameters, and issuing another save().
     """
+
     _endpoint_path = "fileuploads"
-    allowed_kwargs = ('subset',)
+    allowed_kwargs = ("subset",)
 
     def __init__(self, j, resource_type, id_type, _id, resource):
         """Prepare a new FileUpload.
@@ -162,11 +169,19 @@ class FileUpload(object):
                 resource to add the FileUpload to.
             resource: String path to the file to upload.
         """
-        resource_types = ["computers", "mobiledevices", "enrollmentprofiles",
-                          "peripherals", "mobiledeviceenrollmentprofiles",
-                          "policies", "ebooks", "mobiledeviceapplicationsicon",
-                          "mobiledeviceapplicationsipa",
-                          "diskencryptionconfigurations", "printers"]
+        resource_types = [
+            "computers",
+            "mobiledevices",
+            "enrollmentprofiles",
+            "peripherals",
+            "mobiledeviceenrollmentprofiles",
+            "policies",
+            "ebooks",
+            "mobiledeviceapplicationsicon",
+            "mobiledeviceapplicationsipa",
+            "diskencryptionconfigurations",
+            "printers",
+        ]
         id_types = ["id", "name"]
 
         self.jss = j
@@ -176,32 +191,37 @@ class FileUpload(object):
             self.resource_type = resource_type
         else:
             raise TypeError(
-                "resource_type must be one of: %s" % ', '.join(resource_types))
+                "resource_type must be one of: %s" % ", ".join(resource_types)
+            )
         if id_type in id_types:
             self.id_type = id_type
         else:
-            raise TypeError("id_type must be one of: %s" % ', '.join(id_types))
+            raise TypeError("id_type must be one of: %s" % ", ".join(id_types))
         self._id = str(_id)
 
         basename = os.path.basename(resource)
         content_type = mimetypes.guess_type(basename)[0]
-        self.resource = {"name": (basename, open(resource, "rb"),
-                                  content_type)}
+        self.resource = {"name": (basename, open(resource, "rb"), content_type)}
         self._set_upload_url()
 
     def _set_upload_url(self):
         """Generate the full URL for a POST."""
         # pylint: disable=protected-access
-        self._upload_url = "/".join([
-            self.jss._url, self._endpoint_path, self.resource_type,
-            self.id_type, str(self._id)])
+        self._upload_url = "/".join(
+            [
+                self.jss._url,
+                self._endpoint_path,
+                self.resource_type,
+                self.id_type,
+                str(self._id),
+            ]
+        )
         # pylint: enable=protected-access
 
     def save(self):
         """POST the object to the JSS."""
         try:
-            response = self.jss.session.post(
-                self._upload_url, files=self.resource)
+            response = self.jss.session.post(self._upload_url, files=self.resource)
         except PostError as error:
             if error.status_code == 409:
                 raise PostError(error)
@@ -282,7 +302,7 @@ class LogFlush(object):
             DeleteError if provided url_path has a >= 400 response.
         """
         if not isinstance(data, basestring):
-            data = ElementTree.tostring(data, encoding='UTF-8')
+            data = ElementTree.tostring(data, encoding="UTF-8")
         self.jss.delete(self.url, data)
 
     def log_flush_for_interval(self, log_type, interval):
@@ -314,8 +334,7 @@ class LogFlush(object):
         # instead of "+", so do a replace here just in case.
         interval = interval.replace(" ", "+")
 
-        flush_url = "{}/{}/interval/{}".format(
-            self.url, log_type, interval)
+        flush_url = "{}/{}/interval/{}".format(self.url, log_type, interval)
 
         self.jss.delete(flush_url)
 
@@ -354,7 +373,8 @@ class LogFlush(object):
         interval = interval.replace(" ", "+")
 
         flush_url = "{}/{}/id/{}/interval/{}".format(
-            self.url, log_type, obj_id, interval)
+            self.url, log_type, obj_id, interval
+        )
 
         self.jss.delete(flush_url)
 

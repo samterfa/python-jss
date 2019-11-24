@@ -23,13 +23,15 @@ from __future__ import print_function
 
 import getpass
 import os
-import readline   # pylint: disable=unused-import
+
+# import readline  # pylint: disable=unused-import
 import subprocess
 from xml.parsers.expat import ExpatError
 
-from .exceptions import JSSError, GetError
+from .exceptions import GetError, JSSError
 from .jamf_software_server import JSS
-from .tools import is_osx, is_linux, loop_until_valid_response
+from .tools import is_linux, is_osx, loop_until_valid_response
+
 try:
     from .contrib import FoundationPlist as plistlib
 except ImportError:
@@ -85,10 +87,12 @@ class JSSPrefs(object):
 
                 AWS distribution points require:
 
-                - **aws_access_key_id:** The access key ID for the user with r/w permission
-                    to the jamf bucket
-                - **aws_secret_access_key:** The secret key for this user. NOTE: to avoid storing sensitive credentials
-                    this can also be read from the environment variable `AWS_SECRET_ACCESS_KEY`.
+                - **aws_access_key_id:** The access key ID for the user with
+                    r/w permission to the jamf bucket
+                - **aws_secret_access_key:** The secret key for this user.
+                    NOTE: to avoid storing sensitive credentials this can also
+                    be read from the environment variable
+                    `AWS_SECRET_ACCESS_KEY`.
 
     """
 
@@ -110,8 +114,10 @@ class JSSPrefs(object):
         Args:
             preferences_file: String path to an alternate location to
             look for preferences. Defaults based on OS are:
-                OS X: "~/Library/Preferences/com.github.sheagcraig.python-jss.plist"
-                Linux: "~/.com.github.sheagcraig.python-jss.plist"
+                OS X:
+                "~/Library/Preferences/com.github.sheagcraig.python-jss.plist"
+                Linux:
+                "~/.com.github.sheagcraig.python-jss.plist"
 
         Raises:
             JSSError if using an unsupported OS.
@@ -119,7 +125,8 @@ class JSSPrefs(object):
         if preferences_file is None:
             if is_osx():
                 preferences_file = os.path.join(
-                    "~", "Library", "Preferences", PREFS_DEFAULT)
+                    "~", "Library", "Preferences", PREFS_DEFAULT
+                )
             elif is_linux():
                 preferences_file = os.path.join("~", "." + PREFS_DEFAULT)
             else:
@@ -142,9 +149,10 @@ class JSSPrefs(object):
             # If we're on OSX, try to convert using another tool.
             if is_osx():
                 plist = subprocess.check_output(
-                    ["plutil", "-convert", "xml1", "-o", "-",
-                     preferences_file])
-                prefs = plistlib.readPlistFromString(preferences_file)
+                    ["plutil", "-convert", "xml1", "-o", "-", self.preferences_file]
+                )
+                if plist:
+                    prefs = plistlib.readPlistFromString(self.preferences_file)
 
         self.user = prefs.get("jss_user")
         self.password = prefs.get("jss_pass")
@@ -167,18 +175,23 @@ class JSSPrefs(object):
         to write.
         """
         prefs = {}
-        print ("It seems like you do not have a preferences file configured. "
-               "Please answer the following questions to generate a plist at "
-               "%s for use with python-jss." % self.preferences_file)
+        print(
+            "It seems like you do not have a preferences file configured. "
+            "Please answer the following questions to generate a plist at "
+            "%s for use with python-jss." % self.preferences_file
+        )
 
         prefs["jss_url"] = raw_input(
             "The complete URL to your JSS, with port (e.g. "
-            "'https://mycasperserver.org:8443')\nURL: ")
+            "'https://mycasperserver.org:8443')\nURL: "
+        )
 
         prefs["jss_user"] = raw_input("API Username: ")
         prefs["jss_pass"] = getpass.getpass("API User's Password: ")
-        verify_prompt = ("Do you want to verify that traffic is encrypted by "
-                         "a certificate that you trust?: (Y|N) ")
+        verify_prompt = (
+            "Do you want to verify that traffic is encrypted by "
+            "a certificate that you trust?: (Y|N) "
+        )
         prefs["verify"] = loop_until_valid_response(verify_prompt)
         prefs["repos"] = self._handle_repos(prefs)
 
@@ -191,31 +204,38 @@ class JSSPrefs(object):
 
         # Make a temporary jss object to try to pull repo information.
         jss_server = JSS(
-            url=prefs["jss_url"], user=prefs["jss_user"],
-            password=prefs["jss_pass"], ssl_verify=prefs["verify"])
+            url=prefs["jss_url"],
+            user=prefs["jss_user"],
+            password=prefs["jss_pass"],
+            ssl_verify=prefs["verify"],
+        )
         print("Fetching distribution point info...")
         try:
             dpts = jss_server.DistributionPoint()
         except GetError:
-            print (
+            print(
                 "Fetching distribution point info failed. If you want to "
                 "configure distribution points, ensure that your API user "
                 "has read permissions for distribution points, and that the "
-                "URL, username, and password are correct.")
+                "URL, username, and password are correct."
+            )
             dpts = None
 
         if dpts:
-            print ("There are file share distribution points configured on "
-                   "your JSS. Most of the configuration can be automated "
-                   "from the information on the JSS, with the exception of "
-                   "the password for the R/W user.\n")
+            print(
+                "There are file share distribution points configured on "
+                "your JSS. Most of the configuration can be automated "
+                "from the information on the JSS, with the exception of "
+                "the password for the R/W user.\n"
+            )
 
             for dpt in dpts:
                 repo_dict = {}
                 repo_dict["name"] = dpt.get("name")
                 repo_pass_string = getpass.getpass(
                     "Please enter the R/W user's password for distribution "
-                    "point: %s: " % dpt.get("name", "<NO NAME CONFIGURED>"))
+                    "point: %s: " % dpt.get("name", "<NO NAME CONFIGURED>")
+                )
                 repo_dict["password"] = repo_pass_string
                 repos_array.append(repo_dict)
 

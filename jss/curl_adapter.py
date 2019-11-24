@@ -34,34 +34,39 @@ JSS object beginning with python-jss 2.0.0.
 
 
 import copy
-import subprocess
 import logging
+import subprocess
+
+from .exceptions import JSSError  # SSLVerifyError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.StreamHandler())
 
-from .exceptions import JSSError, SSLVerifyError
 
 CURL_RETURNCODE = {
-    1: 'Unsupported protocol. This build of curl has no support for this protocol.',
-    2: 'Failed to initialize.',
-    3: 'URL malformed. The syntax was not correct.',
-    4: 'A feature or option that was needed to perform the desired request was not enabled or was explicitly disabled '
-       'at build-time. To make curl able to do this, you probably need another build of libcurl!',
-    5: 'Couldn\'t resolve proxy. The given proxy host could not be resolved.',
-    6: 'Couldn\'t resolve host. The given remote host was not resolved.',
-    7: 'Failed to connect to host.',
-    8: 'Weird server reply. The server sent data curl couldn\'t parse.',
-    22: 'HTTP page not retrieved. The requested url was not found or returned another error with the HTTP error '
-        'code being 400 or above.',
-    23: 'Write error. Curl couldn\'t write data to a local filesystem or similar.',
-    27: 'Out of memory. A memory allocation request failed.',
-    28: 'Operation timeout. The specified time-out period was reached according to the conditions.',
+    1: "Unsupported protocol. This build of curl has no support for this" "protocol.",
+    2: "Failed to initialize.",
+    3: "URL malformed. The syntax was not correct.",
+    4: "A feature or option that was needed to perform the desired request was"
+    "not enabled or was explicitly disabled "
+    "at build-time. To make curl able to do this, you probably need another"
+    "build of libcurl!",
+    5: "Couldn't resolve proxy. The given proxy host could not be resolved.",
+    6: "Couldn't resolve host. The given remote host was not resolved.",
+    7: "Failed to connect to host.",
+    8: "Weird server reply. The server sent data curl couldn't parse.",
+    22: "HTTP page not retrieved. The requested url was not found or returned"
+    "another error with the HTTP error "
+    "code being 400 or above.",
+    23: "Write error. Curl couldn't write data to a local filesystem or" "similar.",
+    27: "Out of memory. A memory allocation request failed.",
+    28: "Operation timeout. The specified time-out period was reached"
+    "according to the conditions.",
     33: 'HTTP range error. The range "command" didn\'t work.',
-    35: 'SSL connect error. The SSL handshaking failed.',
-    47: 'Too many redirects. When following redirects, curl hit the maximum amount.',
-    60: 'Peer certificate cannot be authenticated with known CA certificates.'
+    35: "SSL connect error. The SSL handshaking failed.",
+    47: "Too many redirects. When following redirects, curl hit the maximum" "amount.",
+    60: "Peer certificate cannot be authenticated with known CA certificates.",
 }
 
 
@@ -74,10 +79,11 @@ class CurlAdapter(object):
             True.
         use_tls: Whether to use TLS. Defaults to True.
     """
-    base_headers = ['Accept: application/xml']
+
+    base_headers = ["Accept: application/xml"]
 
     def __init__(self, verify=True):
-        self.auth = ('', '')
+        self.auth = ("", "")
         self.verify = verify
         self.use_tls = True
 
@@ -85,19 +91,19 @@ class CurlAdapter(object):
         return self._request(url, headers)
 
     def post(self, url, data=None, headers=None, files=None):
-        content_type = 'text/xml' if not files else 'multipart/form-data'
-        header = ['Content-Type: {}'.format(content_type)]
+        content_type = "text/xml" if not files else "multipart/form-data"
+        header = ["Content-Type: {}".format(content_type)]
         if headers:
-            [header.append('{}: {}'.format(k, v)) for k, v in headers.iteritems()]
+            [header.append("{}: {}".format(k, v)) for k, v in headers.iteritems()]
 
         post_kwargs = {"--request": "POST"}
         return self._request(url, header, data, files, **post_kwargs)
 
     def put(self, url, data=None, headers=None, files=None):
-        content_type = 'text/xml' if not files else 'multipart/form-data'
-        header = ['Content-Type: {}'.format(content_type)]
+        content_type = "text/xml" if not files else "multipart/form-data"
+        header = ["Content-Type: {}".format(content_type)]
         if headers:
-            [header.append('{}: {}'.format(k, v)) for k, v in headers.iteritems()]
+            [header.append("{}: {}".format(k, v)) for k, v in headers.iteritems()]
 
         put_args = {"--request": "PUT"}
         return self._request(url, header, data, files, **put_args)
@@ -105,8 +111,8 @@ class CurlAdapter(object):
     def delete(self, url, data=None, headers=None):
         delete_args = {"--request": "DELETE"}
         if data:
-            headers += ['Content-Type: text/xml']
-            delete_args['--data'] = data
+            headers += ["Content-Type: text/xml"]
+            delete_args["--data"] = data
         return self._request(url, headers, **delete_args)
 
     def _request(self, url, headers=None, data=None, files=None, **kwargs):
@@ -116,23 +122,23 @@ class CurlAdapter(object):
         # point of contact, so just do it here and keep it Unicode
         # everywhere else.
         command = [
-            item.encode('UTF-8') if isinstance(item, unicode) else item
-            for item in command]
+            item.encode("UTF-8") if isinstance(item, unicode) else item
+            for item in command
+        ]
 
-        logger.debug(' '.join(command))
+        logger.debug(" ".join(command))
 
         try:
             response = subprocess.check_output(command)
         except subprocess.CalledProcessError as err:
             if err.returncode in CURL_RETURNCODE:
-                raise JSSError('CURL Error: {}'.format(CURL_RETURNCODE[err.returncode]))
+                raise JSSError("CURL Error: {}".format(CURL_RETURNCODE[err.returncode]))
             else:
-                raise JSSError('Unknown curl error: {}'.format(err.returncode))
+                raise JSSError("Unknown curl error: {}".format(err.returncode))
 
         return CurlResponseAdapter(response, url)
 
-    def _build_command(
-        self, url, headers=None, data=None, files=None, **kwargs):
+    def _build_command(self, url, headers=None, data=None, files=None, **kwargs):
         """Construct the argument list for curl.
 
         Encode all unicode to bytes with UTF-8 on the way out.
@@ -148,7 +154,7 @@ class CurlAdapter(object):
             list of arguments to subprocess for making request via curl.
         """
         # Curl expects auth information as a ':' delimited string.
-        auth = '{}:{}'.format(*self.auth)
+        auth = "{}:{}".format(*self.auth)
         command = ["curl", "-u", auth]
 
         # Remove the progress bar that curl displays in a subprocess.
@@ -158,7 +164,7 @@ class CurlAdapter(object):
         # the resulting CurlResponseAdapter.
         command += ["--write-out", "|%{response_code}"]
 
-        if self.verify == False:
+        if self.verify is False:
             command.append("--insecure")
 
         if self.use_tls:
@@ -168,20 +174,23 @@ class CurlAdapter(object):
         if headers:
             compiled_headers += headers
         for header in compiled_headers:
-            command += ['--header', header]
+            command += ["--header", header]
 
         if data:
             if isinstance(data, file):
                 command += ["--data-binary", "@{}".format(data.name)]
             elif isinstance(data, dict):
-                [command.extend(["-F", "{}={}".format(k, v)]) for k, v in data.iteritems()]
+                [
+                    command.extend(["-F", "{}={}".format(k, v)])
+                    for k, v in data.iteritems()
+                ]
             else:
                 command += ["--data", data]
 
         if files:
-            path = files['name'][1].name
-            content_type = files['name'][2]
-            file_data = 'name=@{};type={}'.format(path, content_type)
+            path = files["name"][1].name
+            content_type = files["name"][2]
+            file_data = "name=@{};type={}".format(path, content_type)
             command += ["--form", file_data]
 
         for key, val in kwargs.items():
@@ -211,4 +220,4 @@ class CurlResponseAdapter(object):
         self.content = content
         # Requests' text attribute returns unicode, so convert curl's
         # returned bytes.
-        self.text = content.decode('UTF-8')
+        self.text = content.decode("UTF-8")

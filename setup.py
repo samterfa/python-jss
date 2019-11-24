@@ -15,37 +15,40 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 from jss import __version__
 
-# http://stackoverflow.com/questions/10718767/have-the-same-readme-both-in-markdown-and-restructuredtext
-try:
-    from pypandoc import convert
+# http://stackoverflow.com/questions/10718767
+# /have-the-same-readme-both-in-markdown-and-restructuredtext
 
-    read_md = lambda f: convert(f, 'rst')
-except ImportError:
-    print("Warning: pypandoc module not found, could not convert md to rst")
-    read_md = lambda f: open(os.path.join(os.path.dirname(__file__), f), 'r').read()
 
-setup(name='python-jss',
-      version=__version__,
-      packages=find_packages(),
-      description='Python wrapper for JSS API.',
-      long_description=read_md('README.md'),
-      author='Shea G. Craig',
-      url='https://github.com/JSSImporter/python-jss/',
-      license='GPLv3',
-      install_requires=['requests>=2.13.0'],
-      extras_require={
-          'reST': [
-              "Sphinx>=1.5.3", "docutils>=0.13.1"]
-      },
-      setup_requires=['pytest-runner'],
-      tests_require=[
-          'pytest', 'coverage', 'pytest-docker'
-      ],
-      classifiers=[
-          'Development Status :: 5 - Production/Stable',
-          'License :: OSI Approved :: GNU General Public License v3 (GPLv3)']
-      )
+def read_md(f):
+    try:
+        from pypandoc import convert
+
+        return convert(f, "rst")
+    except ImportError:
+        print("Warning: pypandoc module not found, could not convert md to rst")
+        return open(os.path.join(os.path.dirname(__file__), f), "r").read()
+
+
+setup(
+    name="python-jss",
+    version=__version__,
+    packages=find_packages(),
+    description="Python wrapper for JSS API.",
+    long_description=read_md("README.md"),
+    author="Shea G. Craig",
+    url="https://github.com/JSSImporter/python-jss/",
+    license="GPLv3",
+    install_requires=["requests>=2.13.0"],
+    extras_require={"reST": ["Sphinx>=1.5.3", "docutils>=0.13.1"]},
+    setup_requires=["pytest-runner"],
+    tests_require=["pytest", "coverage", "pytest-docker"],
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    ],
+)

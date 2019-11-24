@@ -1,5 +1,5 @@
 import pytest
-from jss.distribution_point import SMBDistributionPoint, AWS
+from jss.distribution_point import AWS, SMBDistributionPoint
 
 
 class TestAFPDistributionPoint(object):
@@ -7,7 +7,6 @@ class TestAFPDistributionPoint(object):
 
 
 class TestSMBDistributionPoint(object):
-
     @pytest.mark.docker
     def test_mount(self, dp_smb_ip_port, tmpdir, j):
         smb_ip, smb_port = dp_smb_ip_port
@@ -16,10 +15,10 @@ class TestSMBDistributionPoint(object):
             url=smb_ip,
             port=str(smb_port),
             mount_point=tmpdir.strpath,
-            username='jss',
-            password='jss',
-            share_name='distribution_point',
-            domain='WORKGROUP',
+            username="jss",
+            password="jss",
+            share_name="distribution_point",
+            domain="WORKGROUP",
             jss=j,
         )
         dp.mount()
@@ -35,13 +34,13 @@ class TestSMBDistributionPoint(object):
             url=smb_ip,
             port=str(smb_port),
             mount_point=tmpdir.strpath,
-            username='jss',
-            password='jss',
-            share_name='distribution_point',
-            domain='WORKGROUP',
+            username="jss",
+            password="jss",
+            share_name="distribution_point",
+            domain="WORKGROUP",
             jss=j,
         )
-        #dp.copy_pkg()
+        # dp.copy_pkg()
 
 
 class TestLocalRepository(object):
@@ -53,13 +52,8 @@ class TestCDP(object):
 
 
 class TestAWS(object):
-
     @pytest.mark.s3
     def test_aws(self, j, s3_bucket):
-        aws_dp = AWS(
-            jss=j,
-            bucket=s3_bucket
-        )
+        aws_dp = AWS(jss=j, bucket=s3_bucket)
 
         aws_dp.copy_pkg("/Users/Shared/SkypeForBusinessInstaller-16.17.0.65.pkg")
-

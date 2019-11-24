@@ -1,6 +1,5 @@
 *.pyc
 *.swp
-.*
 /test-scripts
 /dist
 /build
@@ -9,3 +8,4 @@ MANIFEST
 .ropeproject
 venv
 dev
+.idea

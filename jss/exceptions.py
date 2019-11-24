@@ -21,11 +21,11 @@ Custom Exceptions for python-jss.
 
 class JSSError(Exception):
     """Base python-jss exception class."""
+
     pass
 
 
 class RequestError(JSSError):
-
     def __init__(self, *args, **kwargs):
         super(RequestError, self).__init__(*args, **kwargs)
         self.status_code = None
@@ -33,29 +33,35 @@ class RequestError(JSSError):
 
 class GetError(RequestError):
     """GET exception."""
+
     pass
 
 
 class PutError(RequestError):
     """PUT exception."""
+
     pass
 
 
 class PostError(RequestError):
     """POST exception."""
+
     pass
 
 
 class DeleteError(RequestError):
     """DEL exception."""
+
     pass
 
 
 class MethodNotAllowedError(JSSError):
     """JSSObject is not allowed to use HTTP method."""
+
     pass
 
 
 class SSLVerifyError(JSSError):
     """Server's certificate could not be verified."""
+
     pass

@@ -26,13 +26,13 @@ import abc
 class AbstractRepository(object):
 
     # If these attributes arent supplied in the constructor, Repository raises a JSSError
-    #required_attrs = set()
+    # required_attrs = set()
 
     # connection arguments
     # connection
 
     @abc.abstractmethod
-    def copy_pkg(self, filename, id_=-1):  # type: (str, Optional[int]) -> None
+    def copy_pkg(self, filename, id_=-1):
         """Copy a package to the repo's Package subdirectory.
 
         Args:
@@ -43,7 +43,7 @@ class AbstractRepository(object):
         pass
 
     @abc.abstractmethod
-    def delete(self, filename):  # type: (str) -> None
+    def delete(self, filename):
         """Delete a file from the repository.
 
         Args:
@@ -53,7 +53,7 @@ class AbstractRepository(object):
         pass
 
     @abc.abstractmethod
-    def exists(self, filename):  # type: (str) -> bool
+    def exists(self, filename):
         """Report whether a file exists on the distribution point.
 
         Determines file type by extension.

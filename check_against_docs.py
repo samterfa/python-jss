@@ -20,10 +20,10 @@ validate python-jss
 """
 
 
-from selenium import webdriver
-from selenium.webdriver.common.action_chains import ActionChains
-
 import jss
+from selenium import webdriver
+
+# from selenium.webdriver.common.action_chains import ActionChains
 
 
 def main():
@@ -33,7 +33,7 @@ def main():
     # The page almost never immediately loads, so wait before trying
     # to access elements.
     driver.implicitly_wait(10)
-    with open('.test_api_url') as handle:
+    with open(".test_api_url") as handle:
         url = handle.read()
     driver.get(url)
 
@@ -54,14 +54,14 @@ def main():
     classes = (getattr(jss.misc_endpoints, cls) for cls in jss.misc_endpoints.__all__)
     jssobjects.update({cls._endpoint_path for cls in classes})
     # Since we cheat and split accounts into Account and AccountGroup
-    jssobjects.add('accounts')
+    jssobjects.add("accounts")
 
     missing = sorted(h2_names.difference(jssobjects))
 
-    print '\n'.join('{:>2}: {}'.format(i, n) for i, n in  enumerate(missing))
+    print "\n".join("{:>2}: {}".format(i, n) for i, n in enumerate(missing))
 
     # TODO: Expand all operations so we can chew on the juicy data within.
-    #expanders = [i for i in expands if i.text == "Expand Operations"]
+    # expanders = [i for i in expands if i.text == "Expand Operations"]
 
     # actions = ActionChains(driver)
     # actions.click(expanders[0])
@@ -71,13 +71,16 @@ def main():
 
     # TODO: Build tag list of reserved tags to look for collisions with
     # the Element interface or our API.
-    # parser = ElementTree.iterparse("/Users/shcrai/Developer/CasperStuff/DA_Casper_Data/all-2.xml")
+    # parser = ElementTree.iterparse(
+    #          "/Users/shcrai/Developer/CasperStuff/DA_Casper_Data/all-2.xml")
     # tags = {e.tag for e in parser}
     # tags.difference_update(set(jss.jssobjects.__all__))
-    # jssobject_api = set(i for i in dir(getattr(jss.jssobjects, cls)) for cls in jss.jssobjects.__all__)
+    # jssobject_api = set(i for i in dir(
+    #          getattr(jss.jssobjects, cls)) for cls in jss.jssobjects.__all__)
     # collisions = tags.intersection(jssobject_api)
     # From DA file:
     # set(['url', 'set', 'name', 'id'])
+
 
 if __name__ == "__main__":
     main()

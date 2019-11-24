@@ -1,6 +1,8 @@
-import pytest
-import jss
 from xml.etree import ElementTree
+
+import jss
+
+# import pytest
 
 
 class TestObjectsPatch(object):
@@ -20,12 +22,12 @@ class TestObjectsPatch(object):
 
     def test_post_patchexternalsource(self, j):
         new_external_source = jss.PatchExternalSource(j, "Fixture")
-        new_external_source.find('host_name').text = 'localhost'
+        new_external_source.find("host_name").text = "localhost"
         new_external_source.save()
 
     def test_put_patchexternalsource(self, j):
         existing_external_source = j.PatchExternalSource("Fixture")
-        existing_external_source.find('host_name').text = '127.0.0.1'
+        existing_external_source.find("host_name").text = "127.0.0.1"
         existing_external_source.save()
 
     def test_delete_patchexternalsource(self, j):
@@ -56,9 +58,9 @@ class TestObjectsPatch(object):
         random_package = j.Package()[0]
 
         patch_software_title = jss.PatchSoftwareTitle(j, "Fixture")
-        patch_software_title.find('name_id').text = "Fixture"
-        patch_software_title.find('source_id').text = "17"
-        patch_software_title.add_package(random_package, '1.0.0')
+        patch_software_title.find("name_id").text = "Fixture"
+        patch_software_title.find("source_id").text = "17"
+        patch_software_title.add_package(random_package, "1.0.0")
 
         xmlstr = ElementTree.tostring(patch_software_title)
         print(xmlstr)

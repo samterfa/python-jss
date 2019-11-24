@@ -23,9 +23,16 @@ CDPs, and JDSs.
 import os
 
 from .distribution_point import (
-    AFPDistributionPoint, SMBDistributionPoint, JDS, CDP, LocalRepository, AWS, JCDS)
+    AWS,
+    CDP,
+    JCDS,
+    JDS,
+    AFPDistributionPoint,
+    LocalRepository,
+    SMBDistributionPoint,
+)
 from .exceptions import JSSError
-from .tools import (is_osx, is_linux, is_package)
+from .tools import is_linux, is_osx, is_package
 
 
 class DistributionPoints(object):
@@ -97,8 +104,9 @@ class DistributionPoints(object):
                 elif repo.get("type") == "Local":
                     mount_point = repo["mount_point"]
                     share_name = repo["share_name"]
-                    dpt = LocalRepository(mount_point=mount_point,
-                                          share_name=share_name, jss=self.jss)
+                    dpt = LocalRepository(
+                        mount_point=mount_point, share_name=share_name, jss=self.jss
+                    )
                 elif repo.get("type") == "JCDS":
                     dpt = JCDS(jss=self.jss)
                 elif repo.get("type") == "AWS":
@@ -117,7 +125,7 @@ class DistributionPoints(object):
         return len(self._children)
 
     def _get_auto_configured_dp(self, repo):
-        "Return a file share DP from auto-configured data."""
+        "Return a file share DP from auto-configured data." ""
         dpt = None
         for dp_object in self.dp_info:
             if repo["name"] == dp_object.name:
@@ -141,25 +149,36 @@ class DistributionPoints(object):
 
                 if connection_type == "AFP":
                     dpt = AFPDistributionPoint(
-                        url=url, port=port, share_name=share_name,
-                        mount_point=mount_point, username=username,
-                        password=password, jss=self.jss)
+                        url=url,
+                        port=port,
+                        share_name=share_name,
+                        mount_point=mount_point,
+                        username=username,
+                        password=password,
+                        jss=self.jss,
+                    )
                 elif connection_type == "SMB":
                     dpt = SMBDistributionPoint(
-                        url=url, port=port, share_name=share_name,
-                        mount_point=mount_point, domain=domain,
-                        username=username, password=password,
-                        jss=self.jss)
+                        url=url,
+                        port=port,
+                        share_name=share_name,
+                        mount_point=mount_point,
+                        domain=domain,
+                        username=username,
+                        password=password,
+                        jss=self.jss,
+                    )
 
         if not dpt:
             raise ValueError(
-                "Error auto-configuring distribution point '{}'!".format(
-                    repo["name"]))
+                "Error auto-configuring distribution point "
+                "'{}'!".format(repo["name"])
+            )
 
         return dpt
 
     def _get_explicitly_configured_dp(self, repo):
-        "Return a file share DP from auto-configured data."""
+        "Return a file share DP from auto-configured data." ""
         url = repo["URL"]
 
         # If found, strip the scheme off the URL
@@ -190,17 +209,28 @@ class DistributionPoints(object):
             # 548.
             port = repo.get("port", "548")
             dpt = AFPDistributionPoint(
-                url=url, port=port, share_name=share_name,
-                mount_point=mount_point, username=username, password=password,
-                jss=self.jss)
+                url=url,
+                port=port,
+                share_name=share_name,
+                mount_point=mount_point,
+                username=username,
+                password=password,
+                jss=self.jss,
+            )
         elif connection_type == "SMB":
             # If port isn't given, assume it's the std of
             # 445.
             port = repo.get("port", "445")
             dpt = SMBDistributionPoint(
-                url=url, port=port, share_name=share_name,
-                mount_point=mount_point, domain=domain, username=username,
-                password=password, jss=self.jss)
+                url=url,
+                port=port,
+                share_name=share_name,
+                mount_point=mount_point,
+                domain=domain,
+                username=username,
+                password=password,
+                jss=self.jss,
+            )
 
         return dpt
 
@@ -315,5 +345,3 @@ class DistributionPoints(object):
             index += 1
 
         return "\n".join(output)
-
-

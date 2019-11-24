@@ -30,6 +30,8 @@ class JSSObjectList(QuerySet):
     def __init__(self, factory, obj_class, objects=None):
         super(JSSObjectList, self).__init__(objects)
         warnings.warn(
-            'JSSObjectList is deprecated and will be removed in the future. '
-            'Please update code to use jss.QuerySet.', FutureWarning,
-            stacklevel=2)
+            "JSSObjectList is deprecated and will be removed in the future. "
+            "Please update code to use jss.QuerySet.",
+            FutureWarning,
+            stacklevel=2,
+        )

@@ -20,14 +20,15 @@ Helper functions for python-jss.
 
 
 import copy
-from functools import wraps
 import os
 import re
+from functools import wraps
+from xml.etree import ElementTree
+
 try:
     from urllib import quote  # Python 2.X
 except ImportError:
     from urllib.parse import quote  # Python 3+
-from xml.etree import ElementTree
 
 
 PKG_TYPES = {".PKG", ".DMG", ".ZIP"}
@@ -88,8 +89,9 @@ def error_handler(exception_cls, response):
     # Responses are sent as html. Split on the newlines and give us
     # the <p> text back.
     error = convert_response_to_text(response)
-    exception = exception_cls("Response Code: %s\tResponse: %s" %
-                              (response.status_code, error))
+    exception = exception_cls(
+        "Response Code: %s\tResponse: %s" % (response.status_code, error)
+    )
     exception.status_code = response.status_code
     raise exception
 
@@ -103,8 +105,14 @@ def loop_until_valid_response(prompt):
     Returns:
         The bool value equivalent of what was entered.
     """
-    responses = {"Y": True, "YES": True, "TRUE": True,
-                 "N": False, "NO": False, "FALSE": False}
+    responses = {
+        "Y": True,
+        "YES": True,
+        "TRUE": True,
+        "N": False,
+        "NO": False,
+        "FALSE": False,
+    }
     response = ""
     while response.upper() not in responses:
         response = raw_input(prompt)
@@ -155,12 +163,12 @@ def element_str(elem):
     # deepcopy so we don't mess with the valid XML.
     pretty_data = copy.deepcopy(elem)
     indent_xml(pretty_data)
-    return ElementTree.tostring(pretty_data, encoding='UTF-8')
+    return ElementTree.tostring(pretty_data, encoding="UTF-8")
 
 
 def quote_and_encode(string):
     """Encode a bytes string to UTF-8 and then urllib.quote"""
-    return quote(string.encode('UTF_8'))
+    return quote(string.encode("UTF_8"))
 
 
 def triggers_cache(func):
@@ -168,7 +176,7 @@ def triggers_cache(func):
 
     @wraps(func)
     def trigger_cache(self, *args, **kwargs):
-        if hasattr(self, 'cached') and not self.cached:
+        if hasattr(self, "cached") and not self.cached:
             self.retrieve()
         return func(self, *args, **kwargs)
 

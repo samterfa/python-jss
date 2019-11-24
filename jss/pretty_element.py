@@ -16,14 +16,17 @@
 
 Pretty-printing xml.etree.ElementTree.Element subclass
 
-..note: As of python 3.3 it seems like you cannot easily subclass Element, see this StackOverflow answer:
+note: As of python 3.3 it seems like you cannot easily subclass Element, see
+this StackOverflow answer:
 
-    Since 3.3 ElementTree tries to import the c implementation in for efficiency,
-    however you can't set arbitrary attributes on that implementation.
-    If you are in a situation where you don't want to use the Set or Get methods every time,
-    you should use ET._Element_Py, which is the Python implementation. - RandomName
+  Since 3.3 ElementTree tries to import the c implementation in for efficiency,
+  however you can't set arbitrary attributes on that implementation.
+  If you are in a situation where you don't want to use the Set or Get methods
+  every time, you should use ET._Element_Py, which is the Python implementation
+  - RandomName
 
-    https://stackoverflow.com/questions/20995601/cant-set-attributes-on-elementtree-element-instance-in-python-3
+  https://stackoverflow.com/questions/20995601/
+    cant-set-attributes-on-elementtree-element-instance-in-python-3
 
 """
 import re
@@ -31,12 +34,11 @@ from xml.etree import ElementTree
 
 from jss import tools
 
-
-_DUNDER_PATTERN = re.compile(r'__[a-zA-Z]+__')
-_RESERVED_METHODS = ('cached',)
+_DUNDER_PATTERN = re.compile(r"__[a-zA-Z]+__")
+_RESERVED_METHODS = ("cached",)
 
 # py3.x and py2 backwards compatible
-if hasattr(ElementTree, '_Element_Py'):
+if hasattr(ElementTree, "_Element_Py"):
     Element = ElementTree._Element_Py
 else:
     Element = ElementTree.Element
@@ -71,8 +73,7 @@ class PrettyElement(Element):
         if result is not None:
             return result
         else:
-            raise AttributeError(
-                'There is no element with the tag "{}"'.format(name))
+            raise AttributeError('There is no element with the tag "{}"'.format(name))
 
     # TODO: This can be removed once `JSSObject.__init__` signature is fixed.
     def makeelement(self, tag, attrib):
@@ -98,4 +99,3 @@ class PrettyElement(Element):
     def _convert(self, item):
         """If item is not a PrettyElement, make it one"""
         return item if isinstance(item, PrettyElement) else PrettyElement(item)
-
