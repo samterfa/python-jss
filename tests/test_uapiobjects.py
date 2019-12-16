@@ -1,9 +1,7 @@
 import pytest
 from jss import JSS, uapiobjects
-try:
-    from UserDict import UserDict  # Python 2.X
-except ImportError:
-    from collections import UserDict  # Python 3.3+
+
+from collections import UserDict  # Python 3.3+
 
 
 

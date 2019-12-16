@@ -19,8 +19,8 @@ Classes representing the various types of file storage available to
 the JAMF Pro Server.
 """
 
-
-
+from __future__ import division
+from __future__ import print_function
 
 import os
 import re
@@ -34,13 +34,23 @@ import threading
 import requests
 
 
-# Python 3
-from html.parser import HTMLParser
+try:
+    # Python 2.6-2.7
+    from HTMLParser import HTMLParser
+except ImportError:
+    # Python 3
+    from html.parser import HTMLParser
 
-from urllib.parse import urlparse
-from urllib.parse import urlencode, unquote, quote
-from urllib.request import urlopen, Request
-from urllib.error import HTTPError
+
+# 2 and 3 compatible
+try:
+    from urllib.parse import urlparse, urlencode, unquote, quote
+    from urllib.request import urlopen, Request
+    from urllib.error import HTTPError
+except ImportError:
+    from urlparse import urlparse
+    from urllib import urlencode, unquote, quote
+    from urllib2 import urlopen, Request, HTTPError
 
 from . import casper
 from . import abstract
@@ -114,7 +124,7 @@ class Repository(object):
         output = ["Distribution Point: %s" % self.connection["url"]]
         output.append("Type: %s" % type(self))
         output.append("Connection Information:")
-        for key, val in list(self.connection.items()):
+        for key, val in self.connection.items():
             output.append("\t%s: %s" % (key, val))
 
         return "\n".join(output) + "\n"
@@ -1119,7 +1129,7 @@ class JCDS(CloudDistributionServer):
         def _chunk_args(chunk_index):
             return [filename, self.connection["jcds_base_url"], upload_token, chunk_index, JCDS.chunk_size, total_chunks]
 
-        for chunk in range(0, total_chunks):
+        for chunk in xrange(0, total_chunks):
             res = p.apply_async(_jcds_upload_chunk, _chunk_args(chunk))
             data = res.get(timeout=10)
             print("id: {0}, version: {1}, size: {2}, filename: {3}, lastModified: {4}, created: {5}".format(
@@ -1130,7 +1140,7 @@ class JCDS(CloudDistributionServer):
         fsize = os.stat(filename).st_size
         total_chunks = int(math.ceil(fsize / JCDS.chunk_size))
 
-        for chunk in range(0, total_chunks):
+        for chunk in xrange(0, total_chunks):
             t = JCDSChunkUploadThread(
                 filename=filename,
                 base_url=self.connection["jcds_base_url"],
@@ -1157,7 +1167,7 @@ class JCDS(CloudDistributionServer):
             # "Content-Type": "application/octet-steam",
         }
 
-        for chunk in range(0, total_chunks):
+        for chunk in xrange(0, total_chunks):
             resource.seek(chunk * JCDS.chunk_size)
             chunk_data = resource.read(JCDS.chunk_size)
             chunk_reader = io.BytesIO(chunk_data)
@@ -1226,7 +1236,7 @@ class JCDS(CloudDistributionServer):
         output = ["JAMF Cloud Distribution Server: %s" % self.connection["jss"].base_url]
         output.append("Type: %s" % type(self))
         output.append("Connection Information:")
-        for key, val in list(self.connection.items()):
+        for key, val in self.connection.items():
             output.append("\t%s: %s" % (key, val))
 
         return "\n".join(output) + "\n"

@@ -681,7 +681,7 @@ class OSXConfigurationProfile(Container):
             id_.text = category.id
             name = ElementTree.SubElement(pcategory, "name")
             name.text = category.name
-        elif isinstance(category, str):
+        elif isinstance(category, basestring):
             name = ElementTree.SubElement(pcategory, "name")
             name.text = category
 
@@ -1237,7 +1237,7 @@ class Policy(Container):
             id_.text = category.id
             name = ElementTree.SubElement(pcategory, "name")
             name.text = category.name
-        elif isinstance(category, str):
+        elif isinstance(category, basestring):
             name = ElementTree.SubElement(pcategory, "name")
             name.text = category
 

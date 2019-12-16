@@ -17,7 +17,7 @@
 
 Classes representing API endpoints that don't subclass JSSObject
 """
-
+from __future__ import print_function
 
 import mimetypes
 import os
@@ -78,7 +78,7 @@ class CommandFlush(object):
         Raises:
             DeleteError if provided url_path has a >= 400 response.
         """
-        if not isinstance(data, str):
+        if not isinstance(data, basestring):
             data = ElementTree.tostring(data, encoding='UTF-8')
         self.jss.delete(self.url, data)
 
@@ -281,7 +281,7 @@ class LogFlush(object):
         Raises:
             DeleteError if provided url_path has a >= 400 response.
         """
-        if not isinstance(data, str):
+        if not isinstance(data, basestring):
             data = ElementTree.tostring(data, encoding='UTF-8')
         self.jss.delete(self.url, data)
 

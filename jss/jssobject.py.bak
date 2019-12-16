@@ -17,13 +17,16 @@
 
 Base Classes representing JSS database objects and their API endpoints
 """
-
+from __future__ import print_function
 from six import string_types
 
 import collections
 import copy
 
-import pickle  # Python 3+
+try:
+    import cPickle  # Python 2.X
+except ImportError:
+    import _pickle as cPickle  # Python 3+
 
 import datetime as dt
 import gzip
@@ -209,7 +212,7 @@ class JSSObject(PrettyElement):
                 Path will have ~ expanded prior to opening.
         """
         with open(os.path.expanduser(path), "wb") as pickle:
-            pickle.Pickler(pickle, pickle.HIGHEST_PROTOCOL).dump(self)
+            cPickle.Pickler(pickle, cPickle.HIGHEST_PROTOCOL).dump(self)
 
     def tree(self, depth=None):
         """Return a formatted string representing object's tags
@@ -465,7 +468,7 @@ class Container(JSSObject):
         kwarg_urls = []
         if kwargs and all(key in cls.allowed_kwargs for key in kwargs):
             kwargs = cls._handle_kwargs(kwargs)
-            for key, val in list(kwargs.items()):
+            for key, val in kwargs.items():
                 kwarg_urls.extend(cls._urlify_arg(key, val))
         return kwarg_urls
 
@@ -579,7 +582,7 @@ class Container(JSSObject):
 
         current_tag.text = name
 
-        for item in list(self.data_keys.items()):
+        for item in self.data_keys.items():
             self._set_xml_from_keys(self, item, **kwargs)
 
     def _set_xml_from_keys(self, root, item, **kwargs):
@@ -604,7 +607,7 @@ class Container(JSSObject):
             target_key = ElementTree.SubElement(root, key)
 
         if isinstance(val, dict):
-            for dict_item in list(val.items()):
+            for dict_item in val.items():
                 self._set_xml_from_keys(target_key, dict_item, **kwargs)
             return
 
@@ -822,7 +825,7 @@ class Container(JSSObject):
                 object.
         """
         # ElementTree.fromstring in python2 really wants bytes.
-        if isinstance(xml_string, str):
+        if isinstance(xml_string, unicode):
             xml_string = xml_string.encode('UTF-8')
         root = ElementTree.fromstring(xml_string)
         return cls(jss, root)
@@ -850,7 +853,7 @@ class Container(JSSObject):
         opener = gzip.open if compressed else open
 
         with opener(os.path.expanduser(path), "rb") as pickle:
-            return pickle.Unpickler(pickle).load()
+            return cPickle.Unpickler(pickle).load()
 
     def to_pickle(self, path, compress=True):
         """Write this object to a Python Pickle.
@@ -873,8 +876,8 @@ class Container(JSSObject):
 
         opener = gzip.open if compress else open
         with opener(path, 'wb') as file_handle:
-            pickle.Pickler(
-                file_handle, pickle.HIGHEST_PROTOCOL).dump(self)
+            cPickle.Pickler(
+                file_handle, cPickle.HIGHEST_PROTOCOL).dump(self)
 
 
 class Group(Container):

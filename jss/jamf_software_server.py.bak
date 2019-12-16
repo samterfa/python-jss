@@ -18,9 +18,12 @@
 Classes representing a JSS, and its available API calls, represented
 as JSSObjects.
 """
+from __future__ import print_function
 
-
-import pickle  # Python 3+
+try:
+    import cPickle  # Python 2.X
+except ImportError:
+    import _pickle as cPickle  # Python 3+
 
 
 import gzip
@@ -31,7 +34,10 @@ import json
 from xml.etree import ElementTree
 import requests
 
-from collections import UserDict  # Python 3.3+
+try:
+    from UserDict import UserDict  # Python 2.X
+except ImportError:
+    from collections import UserDict  # Python 3.3+
 
 # from jss.nsurlsession_adapter import NSURLSessionAdapter
 from .curl_adapter import CurlAdapter
@@ -503,8 +509,8 @@ class JSS(object):
 
         opener = gzip.open if compress else open
         with opener(path, 'wb') as file_handle:
-            pickle.Pickler(
-                file_handle, pickle.HIGHEST_PROTOCOL).dump(all_objects)
+            cPickle.Pickler(
+                file_handle, cPickle.HIGHEST_PROTOCOL).dump(all_objects)
 
     @classmethod
     def from_pickle(cls, path):
@@ -536,7 +542,7 @@ class JSS(object):
         opener = gzip.open if compressed else open
 
         with opener(os.path.expanduser(path), "rb") as pickle:
-            return pickle.Unpickler(pickle).load()
+            return cPickle.Unpickler(pickle).load()
 
     def write_all(self, path):
         """Back up entire JSS to XML file.
@@ -558,7 +564,7 @@ class JSS(object):
 
         with open(os.path.expanduser(path), "w") as ofile:
             root = ElementTree.Element("JSS")
-            for obj_type, objects in list(all_objects.items()):
+            for obj_type, objects in all_objects.items():
                 if objects:
                     sub_element = ElementTree.SubElement(root, obj_type)
                     sub_element.extend(objects)

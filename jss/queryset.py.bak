@@ -21,7 +21,14 @@ result of all queries in python-jss.
 
 
 from collections import defaultdict
-from .jssobject import Identity
+try:
+    import cPickle  # Python 2.X
+except ImportError:
+    import _pickle as cPickle  # Python 3+
+import datetime
+import os
+
+from .jssobject import DATE_FMT, Identity
 
 
 STR_FMT = "{0:>{1}} | {2:>{3}} | {4:>{5}}"
@@ -58,7 +65,7 @@ class QuerySet(list):
         sort_keys = ["id", "name"]
         if self:
             sort_keys.extend([
-                key for key in list(self[0]._basic_identity.keys()) if
+                key for key in self[0]._basic_identity.keys() if
                 key not in sort_keys])
 
         # Build a dict of max lengths per column for table output.

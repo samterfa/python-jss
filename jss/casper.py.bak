@@ -20,15 +20,24 @@ Utility class for getting and presenting information from casper.jxml.
 The results from casper.jxml are undocumented and thus quite likely to be
 removed. Do not rely on its continued existence!
 """
+from __future__ import unicode_literals
 
+try:
+    # Python 2
+    from __builtin__ import str as text
+except ImportError:
+    # Python 3
+    from builtins import str as text
 
-# Python 3
-from builtins import str as text
-
-from urllib.parse import urlparse
-from urllib.parse import urlencode
-from urllib.request import urlopen, Request
-from urllib.error import HTTPError
+# 2 and 3 compatible
+try:
+    from urllib.parse import urlparse, urlencode
+    from urllib.request import urlopen, Request
+    from urllib.error import HTTPError
+except ImportError:
+    from urlparse import urlparse
+    from urllib import urlencode
+    from urllib2 import urlopen, Request, HTTPError
 
 from xml.etree import ElementTree
 

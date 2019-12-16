@@ -17,7 +17,7 @@
 
 Base Classes representing JSS database objects and their UAPI endpoints
 """
-
+from __future__ import print_function
 from six import string_types
 
 import os
@@ -25,8 +25,10 @@ import datetime as dt
 import json
 
 from jss import tools
-
-from collections import UserDict  # Python 3.3+
+try:
+    from UserDict import UserDict  # Python 2.X
+except ImportError:
+    from collections import UserDict  # Python 3.3+
 
 from .exceptions import JSSError, MethodNotAllowedError, PutError, PostError
 
@@ -301,7 +303,7 @@ class UAPIContainer(UAPIObject):
         kwarg_urls = []
         if kwargs and all(key in cls.allowed_kwargs for key in kwargs):
             kwargs = cls._handle_kwargs(kwargs)
-            for key, val in list(kwargs.items()):
+            for key, val in kwargs.items():
                 kwarg_urls.extend(cls._urlify_arg(key, val))
         return kwarg_urls
 

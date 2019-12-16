@@ -23,7 +23,10 @@ import copy
 from functools import wraps
 import os
 import re
-from urllib.parse import quote  # Python 3+
+try:
+    from urllib import quote  # Python 2.X
+except ImportError:
+    from urllib.parse import quote  # Python 3+
 from xml.etree import ElementTree
 
 
@@ -104,7 +107,7 @@ def loop_until_valid_response(prompt):
                  "N": False, "NO": False, "FALSE": False}
     response = ""
     while response.upper() not in responses:
-        response = input(prompt)
+        response = raw_input(prompt)
 
     return responses[response.upper()]
 
