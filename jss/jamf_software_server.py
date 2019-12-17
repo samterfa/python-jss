@@ -314,7 +314,9 @@ class JSS(object):
         if response.status_code == 200 and self.verbose:
             print("GET %s: Success." % request_url)
         elif response.status_code >= 400:
-            error_handler(GetError, response)
+            print("GET %s: Failure." % request_url)
+            raise GetError("Response Code: %s" % response.status_code)
+            # error_handler(GetError, response)
 
         if 'text/xml' in response.headers['content-type']:
             # ElementTree in python2 only accepts bytes.
@@ -395,19 +397,24 @@ class JSS(object):
             PutError if provided url_path has a >= 400 response.
         """
         request_url = os.path.join(self.base_url, quote_and_encode(url_path))
+        print("GPTEMP: %s" % request_url)
         headers = {}
 
-        if isinstance(data, ElementTree.Element):
-            data = ElementTree.tostring(data, encoding='UTF-8')
-            headers = {'Content-Type': 'text/xml', 'Accept': 'text/xml'}
-        elif isinstance(data, dict):
-            data = json.dumps(data)
-            headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        elif isinstance(data, UserDict):
-            data = json.dumps(data.data)
-            headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        else:
-            raise TypeError('Could not PUT unrecognised data type')
+        data = ElementTree.tostring(data, encoding='UTF-8')
+        headers = {'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+
+
+        # if isinstance(data, ElementTree.Element):
+        #     data = ElementTree.tostring(data, encoding='UTF-8')
+        #     headers = {'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+        # elif isinstance(data, dict):
+        #     data = json.dumps(data)
+        #     headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+        # elif isinstance(data, UserDict):
+        #     data = json.dumps(data.data)
+        #     headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+        # else:
+        #     raise TypeError('Could not PUT unrecognised data type')
 
         response = self.session.put(request_url, data=data, headers=headers)
 

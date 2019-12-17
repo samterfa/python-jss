@@ -29,7 +29,7 @@ Pretty-printing xml.etree.ElementTree.Element subclass
 import re
 from xml.etree import ElementTree
 
-from jss import tools
+from . import tools
 
 
 _DUNDER_PATTERN = re.compile(r'__[a-zA-Z]+__')
@@ -98,4 +98,3 @@ class PrettyElement(Element):
     def _convert(self, item):
         """If item is not a PrettyElement, make it one"""
         return item if isinstance(item, PrettyElement) else PrettyElement(item)
-

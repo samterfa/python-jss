@@ -24,7 +24,7 @@ import os
 import datetime as dt
 import json
 
-from jss import tools
+from . import tools
 
 from collections import UserDict  # Python 3.3+
 
@@ -295,7 +295,7 @@ class UAPIContainer(UAPIObject):
 
         else:
             return [key, val]
-        
+
     @classmethod
     def _process_kwargs(cls, kwargs):
         kwarg_urls = []

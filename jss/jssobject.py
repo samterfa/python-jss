@@ -32,7 +32,7 @@ from xml.etree import ElementTree
 
 from .exceptions import JSSError, MethodNotAllowedError, PutError, PostError
 from .pretty_element import PrettyElement
-from jss import tools
+from . import tools
 
 
 
@@ -173,6 +173,8 @@ class JSSObject(PrettyElement):
         Data validation is up to the client; The JSS in most cases will
         at least give you some hints as to what is invalid.
         """
+        print("GPTEMP: %s" % self.url)
+
         try:
             self.jss.put(self.url, data=self)
         except PutError as put_error:
@@ -332,7 +334,7 @@ class Container(JSSObject):
         self._basic_identity = Identity(name="", id="")
         self.kwargs = {}
 
-        if isinstance(data, string_types):
+        if isinstance(data, str):
             self._new(data, **kwargs)
             self.cached = "Unsaved"
 

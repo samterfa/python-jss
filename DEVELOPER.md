@@ -10,15 +10,15 @@
 Some care must be taken to symlink python-jss and JSSImporter into a live autopkg setup.
 
 1. **JSSImporter** by default, will install into `/Library/AutoPkg/autopkglib`, so we must link a dev version into that
-    directory. 
-    
+    directory.
+
     If symlinking you will find that python will follow the link and break imports inside `JSSImporter.py`. For the moment
     I just append another PYTHONPATH to my checked-out JSSImporter git repo, like so:
-    
-        sys.path.insert(0, '/Library/Application Support/JSSImporter')
+
+        sys.path.insert(0, '/Library/AutoPkg/JSSImporter')
         sys.path.insert(0, '/path/to/python-jss')
 
-2. If symlinking `python-jss` into `/Library/Application Support/JSSImporter` it must be a subdirectory named `jss`.
+2. If symlinking `python-jss` into `/Library/AutoPkg/JSSImporter` it must be a subdirectory named `jss`.
 3. If you need to test against newer and/or different python-jss dependencies, you must run autopkg and tests from within
 	a virtualenv.
 
@@ -28,7 +28,7 @@ Some care must be taken to symlink python-jss and JSSImporter into a live autopk
 - Run `pytest` from within the python-jss directory, usually not everyone has the JCDS or CDP so you may also run:
 
 		$ pytest --verbose -m "not docker and not jamfcloud and not s3"
-		
+
 to skip all the docker, jamfcloud and s3 tests.
 
 You can see a list of available markers to skip by running:
@@ -49,7 +49,7 @@ To run specific groups of tests:
 ### Testing with boto ###
 
 Assuming you will create credentials for a test account, you should populate the file `~/.boto` with your access key
-and secret key. See the [boto documentation](http://boto.cloudhackers.com/en/latest/boto_config_tut.html) for more 
+and secret key. See the [boto documentation](http://boto.cloudhackers.com/en/latest/boto_config_tut.html) for more
 information about how to supply credentials for use with S3.
 
 
@@ -66,6 +66,6 @@ Create a run configuration with the following details:
 
 - *Script path*: `/usr/local/bin/autopkg`
 - *Parameters*: `run -vv -k DISABLE_CODE_SIGNATURE_VERIFICATION=1 -k JSS_SUPPRESS_WARNINGS=False TextMate2.jss`
-    
+
     Replace TextMate2.jss with a suitable test recipe.
 - *Python Interpreter*: Make sure to use system python `/usr/bin/python`.

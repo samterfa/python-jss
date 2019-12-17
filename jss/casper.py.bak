@@ -82,4 +82,3 @@ class Casper(ElementTree.Element):
         # Remove previous data, if any, and then add in response's XML.
         self.clear()
         self.extend(response_xml)
-
