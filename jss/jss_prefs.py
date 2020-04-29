@@ -39,7 +39,7 @@ except ImportError:
 
 
 PREFS_DEFAULT = "com.github.sheagcraig.python-jss.plist"
-
+preferences_file = "~/Library/Preferences/com.github.sheagcraig.python-jss.plist"
 
 class JSSPrefs(object):
     """Object representing JSS credentials and configuration.
@@ -171,11 +171,11 @@ class JSSPrefs(object):
                "Please answer the following questions to generate a plist at "
                "%s for use with python-jss." % self.preferences_file)
 
-        prefs["jss_url"] = raw_input(
+        prefs["jss_url"] = input(
             "The complete URL to your JSS, with port (e.g. "
             "'https://mycasperserver.org:8443')\nURL: ")
 
-        prefs["jss_user"] = raw_input("API Username: ")
+        prefs["jss_user"] = input("API Username: ")
         prefs["jss_pass"] = getpass.getpass("API User's Password: ")
         verify_prompt = ("Do you want to verify that traffic is encrypted by "
                          "a certificate that you trust?: (Y|N) ")

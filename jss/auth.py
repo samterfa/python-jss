@@ -43,7 +43,6 @@ class UAPIAuth(requests.auth.AuthBase):
         r = requests.post(self.fetch_url, auth=(self.username, self.password), verify=False)
         r.raise_for_status()
         data = r.json()
-
         self.token = data['token']
         #self.expires = datetime.utcfromtimestamp(data['expires'])
 

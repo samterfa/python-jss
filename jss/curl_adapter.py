@@ -74,6 +74,18 @@ class CurlAdapter(object):
             True.
         use_tls: Whether to use TLS. Defaults to True.
     """
+    # import os
+    #
+    # if not 'jss_return_type' in os.environ.keys():
+    #     print("Returning XML by default! Run {os.environ['jss_return_type'] = 'json'; import jss} to switch to returning JSON for Jamf API calls.")
+    #     base_headers = ['Accept: application/xml']
+    # elif os.environ['jss_return_type'] == 'json':
+    #     print("Returning JSON! Run {os.environ['jss_return_type'] = 'xml'; import jss} to switch to returning XML for Jamf API calls.")
+    #     base_headers = ['Accept: application/json']
+    # else:
+    #     print("Returning XML! Run {os.environ['jss_return_type'] = 'json'; import jss} to switch to returning JSON for Jamf API calls.")
+    #     base_headers = ['Accept: application/xml']
+
     base_headers = ['Accept: application/xml']
 
     def __init__(self, verify=True):

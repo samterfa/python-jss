@@ -107,7 +107,7 @@ def loop_until_valid_response(prompt):
                  "N": False, "NO": False, "FALSE": False}
     response = ""
     while response.upper() not in responses:
-        response = raw_input(prompt)
+        response = input(prompt)
 
     return responses[response.upper()]
 

@@ -39,7 +39,7 @@ __all__ = (
     'Computer', 'ComputerApplication', 'ComputerApplicationUsage',
     'ComputerCheckIn', 'ComputerCommand', 'ComputerConfiguration',
     'ComputerExtensionAttribute', 'ComputerGroup',
-    'ComputerHardwareSoftwareReport', 'ComputerHistory',
+    'Compu/Users/terfasam/Documents/GitHub/jss/doc/jss/guides/basics.rstterHardwareSoftwareReport', 'ComputerHistory',
     'ComputerInventoryCollection', 'ComputerInvitation', 'ComputerManagement',
     'ComputerReport', 'Department', 'DirectoryBinding',
     'DiskEncryptionConfiguration', 'DistributionPoint', 'DockItem', 'EBook',
